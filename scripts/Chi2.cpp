@@ -83,18 +83,6 @@ double Stat_and_Syst(string EFT, string KV, TH1D* phi_Input[7], TH1D* cos_Input[
         double up_x = fithist_phiS->GetX(min_value_phiS,0,5);
         double delta_C_phiS = (up_x - low_x)/2;
 
-        if(Draw_Graph == true)
-        {
-            if(EFT == "cbwi") ChiSquare_phiS->GetXaxis()->SetTitle("C_{bW}^{I}");
-            if(EFT == "ctwi") ChiSquare_phiS->GetXaxis()->SetTitle("C_{tW}^{I}");
-            ChiSquare_phiS->GetYaxis()->SetTitle("#chi^{2}");
-            TCanvas* c1 = new TCanvas("Canvas","Canvas");
-            ChiSquare_phiS->Draw("");
-            fithist_phiS->Draw("SAME");
-            string name = "results/ChiSquare_phiS_" + EFT + ".pdf";
-            c1->Print(name.c_str());
-        }
-
         return delta_C_phiS;
     }
 
@@ -152,18 +140,6 @@ double Stat_and_Syst(string EFT, string KV, TH1D* phi_Input[7], TH1D* cos_Input[
         double low_x2 = fithist_cosS->GetX(min_value_cosS,-5,0);
         double up_x2 = fithist_cosS->GetX(min_value_cosS,0,5);
         double delta_C_cos = (up_x2 - low_x2)/2;
-
-        if(Draw_Graph == true)
-        {
-            if(EFT == "cbwi") ChiSquare_cosThetaS->GetXaxis()->SetTitle("C_{bW}^{I}");
-            if(EFT == "ctwi") ChiSquare_cosThetaS->GetXaxis()->SetTitle("C_{tW}^{I}");
-            ChiSquare_cosThetaS->GetYaxis()->SetTitle("#chi^{2}");
-            TCanvas* c2 = new TCanvas("Canvas","Canvas");
-            ChiSquare_cosThetaS->Draw("");
-            fithist_cosS->Draw("SAME");
-            string name2 = "results/ChiSquare_cosThetaS_" + EFT + ".pdf";
-            c2->Print(name2.c_str());
-        }
 
         return delta_C_cos;
     } 
@@ -248,103 +224,206 @@ int main()
     
     suffix[0] = "hist_reco_phiStar.root";
     suffix[1] = "hist_reco_cosThetaStar.root";
+    //Import .root files
+    TFile* phi_Input;
+    TFile* cos_Input; 
+    TH1D* nominal_Input_phi[7]; //Import signals and background noise nominals for PhiStar
+    TH1D* nominal_Input_cos[7]; //Import signals and background noise nominals for CosThetaStar
+    
+    phi_Input = new TFile(("data/" + suffix[0]).c_str(),"READ");
+    cos_Input = new TFile(("data/" + suffix[1]).c_str(),"READ");
 
-    TFile* fInput[nbfiles]; //Import .root files
-    TH1D* nominal_Input_phi[8]; //Import signals and background noise nominals for PhiStar
-    TH1D* nominal_Input_cos[8]; //Import signals and background noise nominals for CosThetaStar
-    //TH1D* syst_Input_phi[40]; //Import signals and background noise Systematic Uncertainties
-
-    for(int i=0 ; i<nbfiles ; i++)
-    {
-        inputDirectory = "data/" + suffix[i];
-        fInput[i] = new TFile(inputDirectory.c_str(),"READ");
-    }
     //Fill data from STreco
     //nominals = stats uncertainties
-    nominal_Input_phi[0] = (TH1D*) fInput[0]->Get("elmu__top__nominal");
-    nominal_Input_phi[1] = (TH1D*) fInput[0]->Get("elmu__antitop__nominal");
-    nominal_Input_phi[2] = (TH1D*) fInput[0]->Get("elmu__tt__nominal");
-    nominal_Input_phi[3] = (TH1D*) fInput[0]->Get("elmu__tw__nominal");
-    nominal_Input_phi[4] = (TH1D*) fInput[0]->Get("elmu__wzjets__nominal");
-    nominal_Input_phi[5] = (TH1D*) fInput[0]->Get("elmu__QCD_DD_EC__nominal");
-    nominal_Input_phi[6] = (TH1D*) fInput[0]->Get("elmu__QCD_DD_Barrel__nominal");
+    nominal_Input_phi[0] = (TH1D*) phi_Input->Get("elmu__top__nominal");
+    nominal_Input_phi[1] = (TH1D*) phi_Input->Get("elmu__antitop__nominal");
+    nominal_Input_phi[2] = (TH1D*) phi_Input->Get("elmu__tt__nominal");
+    nominal_Input_phi[3] = (TH1D*) phi_Input->Get("elmu__tw__nominal");
+    nominal_Input_phi[4] = (TH1D*) phi_Input->Get("elmu__wzjets__nominal");
+    nominal_Input_phi[5] = (TH1D*) phi_Input->Get("elmu__QCD_DD_EC__nominal");
+    nominal_Input_phi[6] = (TH1D*) phi_Input->Get("elmu__QCD_DD_Barrel__nominal");
 
-    nominal_Input_cos[0] = (TH1D*) fInput[1]->Get("elmu__top__nominal");
-    nominal_Input_cos[1] = (TH1D*) fInput[1]->Get("elmu__antitop__nominal");
-    nominal_Input_cos[2] = (TH1D*) fInput[1]->Get("elmu__tt__nominal");
-    nominal_Input_cos[3] = (TH1D*) fInput[1]->Get("elmu__tw__nominal");
-    nominal_Input_cos[4] = (TH1D*) fInput[1]->Get("elmu__wzjets__nominal");
-    nominal_Input_cos[5] = (TH1D*) fInput[1]->Get("elmu__QCD_DD_EC__nominal");
-    nominal_Input_cos[6] = (TH1D*) fInput[1]->Get("elmu__QCD_DD_Barrel__nominal");
+    nominal_Input_cos[0] = (TH1D*) cos_Input->Get("elmu__top__nominal");
+    nominal_Input_cos[1] = (TH1D*) cos_Input->Get("elmu__antitop__nominal");
+    nominal_Input_cos[2] = (TH1D*) cos_Input->Get("elmu__tt__nominal");
+    nominal_Input_cos[3] = (TH1D*) cos_Input->Get("elmu__tw__nominal");
+    nominal_Input_cos[4] = (TH1D*) cos_Input->Get("elmu__wzjets__nominal");
+    nominal_Input_cos[5] = (TH1D*) cos_Input->Get("elmu__QCD_DD_EC__nominal");
+    nominal_Input_cos[6] = (TH1D*) cos_Input->Get("elmu__QCD_DD_Barrel__nominal");
 
 
 
     ofstream out_file;
     out_file.open("Uncerts.txt");
-    out_file << "Only Systematic Uncertainties:\n";
+    out_file << "Only Statistic Uncertainties:\n";
     
     //Compute Statistical uncert:
-    double delta_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-    cout<<"delta_cbwi_phiStar = "<<delta_cbwi_phi<<endl;
+    double delta_cbwi_phi_stat = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_cbwi_phiStar_stat = "<<delta_cbwi_phi_stat<<endl;
 
-    double delta_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-    cout<<"delta_ctwi_phiStar = "<<delta_ctwi_phi<<endl;
+    double delta_ctwi_phi_stat = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_ctwi_phiStar_stat = "<<delta_ctwi_phi_stat<<endl;
 
-    double delta_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-    cout<<"delta_cbwi_cosThetaStar = "<<delta_cbwi_cos<<endl;
+    double delta_cbwi_cos_stat = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_cbwi_cosThetaStar_stat = "<<delta_cbwi_cos_stat<<endl;
 
-    double delta_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-    cout<<"delta_ctwi_cosThetaStar = "<<delta_ctwi_cos<<endl;
+    double delta_ctwi_cos_stat = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_ctwi_cosThetaStar_stat = "<<delta_ctwi_cos_stat<<endl;
 
 
-    out_file << "delta_cbwi_phi = " << delta_cbwi_phi << "\n";
-    out_file << "delta_ctwi_phi = " << delta_ctwi_phi << "\n";
-    out_file << "delta_cbwi_cos = " << delta_cbwi_cos << "\n";
-    out_file << "delta_ctwi_cos = " << delta_ctwi_cos << "\n";
+    out_file << "delta_cbwi_phi_stat = " << delta_cbwi_phi_stat << "\n";
+    out_file << "delta_ctwi_phi_stat = " << delta_ctwi_phi_stat << "\n";
+    out_file << "delta_cbwi_cos_stat = " << delta_cbwi_cos_stat << "\n";
+    out_file << "delta_ctwi_cos_stat = " << delta_ctwi_cos_stat << "\n";
+    
 
-/*
+    ////////////////////////////////////Systematics///////////////////////////////////
+    int nb_of_systs = 31;
+    out_file << "\nSystematics:\n" <<endl;
+    string prefix = "elmu";
+    string physics_process[7] = {"__top__", "__antitop__", "__tt__", "__tw__", "__wzjets__", "__QCD_DD_EC__","__QCD_DD_Barrel__"};
+    
+    string syst_unc[nb_of_systs] = {"bsfHFcorr", "bsfHFuncorr", "bsfLF", "bsf", "elsf", "jer", "jesAbsolute", "jesAbsolute_2017", "jesBBEC1", "jesBBEC1_2017",
+        "jesEC2", "jesEC2_2017", "jesFlavorMerged", "jesHF", "jesHF_2017", "jesRelativeBal", "jesRelativeSample_2017", "jesTotal", "musf", "pdf", 
+            "prefire", "pu", "ewk_q2", "single_top_q2", "tchannel_isr", "top_fsr", "top_pt", "tt_isr", "tt_q2", "tw_isr", "unclustEn"};
+    
+    string Up_Down[2] = {"Up", "Down"};
+
+    TH1D* syst_Input_phi[7];
+    TH1D* syst_Input_cos[7];
+
+    double stat_syst_cbwi_phi[2];
+    double stat_syst_ctwi_phi[2];
+    double stat_syst_cbwi_cos[2];
+    double stat_syst_ctwi_cos[2];
+
+    for(int i=0 ; i<nb_of_systs ; i++) //iteration over systematics
+    {
+        for(int j=0 ; j<2 ; j++)
+        {
+            syst_Input_phi[0] = (TH1D*) phi_Input->Get((prefix + physics_process[0] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_phi[1] = (TH1D*) phi_Input->Get((prefix + physics_process[1] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_phi[2] = (TH1D*) phi_Input->Get((prefix + physics_process[2] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_phi[3] = (TH1D*) phi_Input->Get((prefix + physics_process[3] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_phi[4] = (TH1D*) phi_Input->Get((prefix + physics_process[4] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_phi[5] = (TH1D*) phi_Input->Get("elmu__QCD_DD_EC__nominal");
+            syst_Input_phi[6] = (TH1D*) phi_Input->Get("elmu__QCD_DD_Barrel__nominal");
+
+            syst_Input_cos[0] = (TH1D*) cos_Input->Get((prefix + physics_process[0] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_cos[1] = (TH1D*) cos_Input->Get((prefix + physics_process[1] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_cos[2] = (TH1D*) cos_Input->Get((prefix + physics_process[2] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_cos[3] = (TH1D*) cos_Input->Get((prefix + physics_process[3] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_cos[4] = (TH1D*) cos_Input->Get((prefix + physics_process[4] + syst_unc[i] + Up_Down[j]).c_str());
+            syst_Input_cos[5] = (TH1D*) cos_Input->Get("elmu__QCD_DD_EC__nominal");
+            syst_Input_cos[6] = (TH1D*) cos_Input->Get("elmu__QCD_DD_Barrel__nominal");
+            
+            ///////Listing Exceptions//////////
+            if(i == 22)
+            {
+                syst_Input_phi[2] = (TH1D*) phi_Input->Get("elmu__tt__nominal");
+                syst_Input_cos[2] = (TH1D*) cos_Input->Get("elmu__tt__nominal");
+            }
+
+            if(i == 23 || i == 24)
+            {
+                syst_Input_phi[2] = (TH1D*) phi_Input->Get("elmu__tt__nominal");
+                syst_Input_phi[3] = (TH1D*) phi_Input->Get("elmu__tw__nominal");
+                syst_Input_phi[4] = (TH1D*) phi_Input->Get("elmu__wzjets__nominal");
+
+                syst_Input_cos[2] = (TH1D*) cos_Input->Get("elmu__tt__nominal");
+                syst_Input_cos[3] = (TH1D*) cos_Input->Get("elmu__tw__nominal");
+                syst_Input_cos[4] = (TH1D*) cos_Input->Get("elmu__wzjets__nominal");
+            }
+
+            if(i == 25)
+            {
+                syst_Input_phi[4] = (TH1D*) phi_Input->Get("elmu__wzjets__nominal");
+                syst_Input_cos[4] = (TH1D*) cos_Input->Get("elmu__wzjets__nominal");
+            }
+
+            if(i == 26 || i == 27 || i == 28)
+            {
+                syst_Input_phi[0] = (TH1D*) phi_Input->Get("elmu__top__nominal");
+                syst_Input_phi[1] = (TH1D*) phi_Input->Get("elmu__antitop__nominal");
+                syst_Input_phi[3] = (TH1D*) phi_Input->Get("elmu__tw__nominal");
+                syst_Input_phi[4] = (TH1D*) phi_Input->Get("elmu__wzjets__nominal");
+
+                syst_Input_cos[0] = (TH1D*) cos_Input->Get("elmu__top__nominal");
+                syst_Input_cos[1] = (TH1D*) cos_Input->Get("elmu__antitop__nominal");
+                syst_Input_cos[3] = (TH1D*) cos_Input->Get("elmu__tw__nominal");
+                syst_Input_cos[4] = (TH1D*) cos_Input->Get("elmu__wzjets__nominal");
+            }
+
+            if(i == 29)
+            {
+                syst_Input_phi[0] = (TH1D*) phi_Input->Get("elmu__top__nominal");
+                syst_Input_phi[1] = (TH1D*) phi_Input->Get("elmu__antitop__nominal");
+                syst_Input_phi[2] = (TH1D*) phi_Input->Get("elmu__tt__nominal");
+                syst_Input_phi[4] = (TH1D*) phi_Input->Get("elmu__wzjets__nominal");
+
+                syst_Input_cos[0] = (TH1D*) cos_Input->Get("elmu__top__nominal");
+                syst_Input_cos[1] = (TH1D*) cos_Input->Get("elmu__antitop__nominal");
+                syst_Input_cos[2] = (TH1D*) cos_Input->Get("elmu__tt__nominal");
+                syst_Input_cos[4] = (TH1D*) cos_Input->Get("elmu__wzjets__nominal");     
+            }
+            
+            stat_syst_cbwi_phi[j] = Stat_and_Syst("cbwi", "phi", syst_Input_phi, syst_Input_cos,1,1,1,1,1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            stat_syst_ctwi_phi[j] = Stat_and_Syst("ctwi", "phi", syst_Input_phi, syst_Input_cos,1,1,1,1,1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            stat_syst_cbwi_cos[j] = Stat_and_Syst("cbwi", "cos", syst_Input_phi, syst_Input_cos,1,1,1,1,1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            stat_syst_ctwi_cos[j] = Stat_and_Syst("ctwi", "cos", syst_Input_phi, syst_Input_cos,1,1,1,1,1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            //out_file <<"delta_cbwi_phiStar for "<<syst_unc[i]<<" and "<< Up_Down[j] << " = " << stat_syst_cbwi_phi[j] << "\n";
+            //out_file <<"delta_ctwi_phiStar for "<<syst_unc[i]<<" and "<< Up_Down[j] << " = " << stat_syst_ctwi_phi[j] << "\n";
+            //out_file <<"delta_cbwi_cosThetaStar for "<<syst_unc[i]<<" and "<< Up_Down[j] << " = " << stat_syst_cbwi_cos[j] << "\n";
+            //out_file <<"delta_ctwi_cosThetaStar for "<<syst_unc[i]<<" and "<< Up_Down[j] << " = " << stat_syst_ctwi_cos[j] << "\n" << "\n";
+
+            
+        }
+    }
 
     double Lumi_2017_syst = 0.0023;
-
-    double tt_normalization_syst = 1.06;
-    double tw_normalization_syst = 1.11;
-    double wzjets_normalization = 1.1;
-
-    double qcd_normalization_2017_syst = 1.5;
-
-    double syst_tt=1, syst_tw=1, syst_wzjets=1, syst_QCD_EC=1, syst_QCD_Barrel=1;
-    //Syst + Stat for Lumi 2017:
-    //Up:
-    syst_tt +=  Lumi_2017_syst ;
-    syst_tw += Lumi_2017_syst ;
-    syst_wzjets += Lumi_2017_syst ;
-    syst_QCD_EC += Lumi_2017_syst ;
-    syst_QCD_Barrel += Lumi_2017_syst ;
-    double stat_syst_Lumi_2017_up = Stat_and_Syst(EFT, KV, syst_tt, syst_tw, syst_wzjets, syst_QCD_EC, syst_QCD_Barrel, Draw_Graph);
-
-    syst_tt=1; syst_tw=1; syst_wzjets=1; syst_QCD_EC=1; syst_QCD_Barrel=1;
-    //Down:
-    syst_tt -=  Lumi_2017_syst ;
-    syst_tw -= Lumi_2017_syst ;
-    syst_wzjets -= Lumi_2017_syst ;
-    syst_QCD_EC -= Lumi_2017_syst ;
-    syst_QCD_Barrel -= Lumi_2017_syst ;
-    double stat_syst_Lumi_2017_down = Stat_and_Syst(EFT, KV, syst_tt, syst_tw, syst_wzjets, syst_QCD_EC, syst_QCD_Barrel, Draw_Graph);
-
-    cout<<stat_syst_Lumi_2017_up<<";"<<stat_syst_Lumi_2017_down<<endl;
-
-    double max_Lumi_2017 = max(abs(stat_syst_Lumi_2017_up),abs(stat_syst_Lumi_2017_down));
-    cout<<"max_Lumi_2017="<<max_Lumi_2017<<endl;
-
-    double syst_Lumi_2017 = sqrt( abs( pow(max_Lumi_2017,2) - pow (2.23841,2) ) );
-    cout<<"syst_Lumi_2017="<<syst_Lumi_2017<<endl;
+    double tt_normalization_syst = 0.06;
+    double tw_normalization_syst = 0.11;
+    double wzjets_normalization = 0.1;
+    double qcd_normalization_2017_syst = 0.5;
 
 
-    myfile.close();
 
-    */
+    out_file.close();
 
     return 0;    
 }
 
+
+
+/*
+        if(Draw_Graph == true)
+        {
+            if(EFT == "cbwi") ChiSquare_phiS->GetXaxis()->SetTitle("C_{bW}^{I}");
+            if(EFT == "ctwi") ChiSquare_phiS->GetXaxis()->SetTitle("C_{tW}^{I}");
+            ChiSquare_phiS->GetYaxis()->SetTitle("#chi^{2}");
+            TCanvas* c1 = new TCanvas("Canvas","Canvas");
+            ChiSquare_phiS->Draw("");
+            fithist_phiS->Draw("SAME");
+            string name = "results/ChiSquare_phiS_" + EFT + ".pdf";
+            c1->Print(name.c_str());
+        }
+
+
+
+        if(Draw_Graph == true)
+        {
+            if(EFT == "cbwi") ChiSquare_cosThetaS->GetXaxis()->SetTitle("C_{bW}^{I}");
+            if(EFT == "ctwi") ChiSquare_cosThetaS->GetXaxis()->SetTitle("C_{tW}^{I}");
+            ChiSquare_cosThetaS->GetYaxis()->SetTitle("#chi^{2}");
+            TCanvas* c2 = new TCanvas("Canvas","Canvas");
+            ChiSquare_cosThetaS->Draw("");
+            fithist_cosS->Draw("SAME");
+            string name2 = "results/ChiSquare_cosThetaS_" + EFT + ".pdf";
+            c2->Print(name2.c_str());
+        }
+
+
+
+*/
 
