@@ -17,73 +17,9 @@ using namespace std;
 
 
 
-double Stat_and_Syst(string EFT, string KV, TH1D* phi_Input[7], TH1D* cos_Input[7], double syst_tt, double syst_tw, double syst_wzjets, double syst_QCD_EC, double syst_QCD_Barrel, bool Draw_Graph)
+double Stat_and_Syst(string EFT, string KV, TH1D* phi_Input[7], TH1D* cos_Input[7], double syst_tt, double syst_tw, double syst_wzjets, double syst_QCD_EC, double syst_QCD_Barrel, bool Draw_Graph, TFormula* Wilson_phiS_cbwi_Input[20], TFormula* Wilson_phiS_ctwi_Input[20], TFormula* Wilson_cosS_cbwi_Input[20], TFormula* Wilson_cosS_ctwi_Input[20])
 {
     int nb_bins = 20;
-    int nb_files = 4;
-
-    string file[4];
-    file[0] = "signal_proc_cosThetaStar_cbwi_elmu_20bins_Rwgt_cbwi2p5.root";
-    file[1] = "signal_proc_cosThetaStar_ctwi_elmu_20bins_Rwgt_cbwi2p5.root";
-    file[2] = "signal_proc_PhiStar_cbwi_elmu_20bins_Rwgt_cbwi2p5.root";
-    file[3] = "signal_proc_PhiStar_ctwi_elmu_20bins_Rwgt_cbwi2p5.root";
-
-
-
-    //Import TF1 fits and formulas for Wilson coefficients:
-    TF1* Fit_phiS_cbwi_Input[nb_bins];
-    TF1* Fit_phiS_ctwi_Input[nb_bins];
-    TF1* Fit_cosS_cbwi_Input[nb_bins];
-    TF1* Fit_cosS_ctwi_Input[nb_bins];
-    TFormula* Wilson_phiS_cbwi_Input[nb_bins];
-    TFormula* Wilson_phiS_ctwi_Input[nb_bins];
-    TFormula* Wilson_cosS_cbwi_Input[nb_bins];
-    TFormula* Wilson_cosS_ctwi_Input[nb_bins];
-    string inputDirectory; //pwd to .root files directory
-
-
-    TFile* fInput[nb_files]; //Import .root files
-    for(int i=0 ; i<nb_files ; i++)
-    {
-        inputDirectory = "data/" + file[i];
-        fInput[i] = new TFile(inputDirectory.c_str(),"READ");
-    }
-
-    //Fill Tables with the EFT/SM values. [0]->Wilson=-2; [1]->Wilson=-1; [2]->Wilson=0; [3]->Wilson=1; [4]->Wilson=2;
-    string bin_name;
-    for(int i=0 ; i<nb_bins ; i++)
-    {
-        bin_name = "bin_content_";
-        bin_name += to_string(i+1);
-        Fit_cosS_cbwi_Input[i] = (TF1*) fInput[0]->Get(bin_name.c_str());
-        Wilson_cosS_cbwi_Input[i] = Fit_cosS_cbwi_Input[i]->GetFormula();
-    }
-
-    for(int i=0 ; i<nb_bins ; i++)
-    {
-        bin_name = "bin_content_";
-        bin_name += to_string(i+1);
-        Fit_cosS_ctwi_Input[i] = (TF1*) fInput[1]->Get(bin_name.c_str());
-        Wilson_cosS_ctwi_Input[i] = Fit_cosS_ctwi_Input[i]->GetFormula();
-    }
-
-    for(int i=0 ; i<nb_bins ; i++)
-    {
-        bin_name = "bin_content_";
-        bin_name += to_string(i+1);
-        Fit_phiS_cbwi_Input[i] = (TF1*) fInput[2]->Get(bin_name.c_str());
-        Wilson_phiS_cbwi_Input[i] = Fit_phiS_cbwi_Input[i]->GetFormula();
-    }
-
-    for(int i=0 ; i<nb_bins ; i++)
-    {
-        bin_name = "bin_content_";
-        bin_name += to_string(i+1);
-        Fit_phiS_ctwi_Input[i] = (TF1*) fInput[3]->Get(bin_name.c_str());
-        Wilson_phiS_ctwi_Input[i] = Fit_phiS_ctwi_Input[i]->GetFormula();
-    }
-
-
     int bin = 1;
     double c = -2;
     double step = 0.001 , range = 4;
@@ -93,6 +29,7 @@ double Stat_and_Syst(string EFT, string KV, TH1D* phi_Input[7], TH1D* cos_Input[
 
     if(KV == "phi")
     {
+        cout<<"PhiStar_"<<EFT<<endl;
         TH1F* ChiSquare_phiS = new TH1F("ChiSquare_phiS", "" , nb_iterations, -range, range);
 
         //PhiStar
@@ -163,6 +100,7 @@ double Stat_and_Syst(string EFT, string KV, TH1D* phi_Input[7], TH1D* cos_Input[
 
     if(KV == "cos")
     {
+        cout<<"CosThetaStar_"<<EFT<<endl;
         TH1F* ChiSquare_cosThetaS = new TH1F("ChiSquare_cosS", "" , nb_iterations, -range, range);
 
         for(int j=0 ; j<nb_iterations ; j++)
@@ -229,30 +167,92 @@ double Stat_and_Syst(string EFT, string KV, TH1D* phi_Input[7], TH1D* cos_Input[
 
         return delta_C_cos;
     } 
-}
 
+    return 0;
+}
 
 
 int main()
 {
-    string EFT = "cbwi";
-    string KV = "phi";
-    bool Draw_Graph = false;
 
-    int nbfiles = 2;
+    ////////////////////////////Import all TFormulas to get EFT/SM ratio per value of Wilson Coeff////////////////////////////
     int nb_bins = 20;
+    int EFT_nb_files = 4;
+
+    string EFT_file[EFT_nb_files];
+    EFT_file[0] = "signal_proc_cosThetaStar_cbwi_elmu_20bins_Rwgt_cbwi2p5.root";
+    EFT_file[1] = "signal_proc_cosThetaStar_ctwi_elmu_20bins_Rwgt_cbwi2p5.root";
+    EFT_file[2] = "signal_proc_PhiStar_cbwi_elmu_20bins_Rwgt_cbwi2p5.root";
+    EFT_file[3] = "signal_proc_PhiStar_ctwi_elmu_20bins_Rwgt_cbwi2p5.root";
+
+
+
+    //Import TF1 fits and formulas for Wilson coefficients:
+    TF1* Fit_phiS_cbwi_Input[nb_bins];
+    TF1* Fit_phiS_ctwi_Input[nb_bins];
+    TF1* Fit_cosS_cbwi_Input[nb_bins];
+    TF1* Fit_cosS_ctwi_Input[nb_bins];
+    TFormula* Wilson_phiS_cbwi_Input[nb_bins];
+    TFormula* Wilson_phiS_ctwi_Input[nb_bins];
+    TFormula* Wilson_cosS_cbwi_Input[nb_bins];
+    TFormula* Wilson_cosS_ctwi_Input[nb_bins];
+    string inputDirectory; //pwd to .root files directory
+
+
+    TFile* EFT_fInput[EFT_nb_files]; //Import .root files
+    
+    for(int i=0 ; i<EFT_nb_files ; i++)
+    {
+        inputDirectory = "data/" + EFT_file[i];
+        EFT_fInput[i] = new TFile(inputDirectory.c_str(),"READ");
+    }
+
+    //Fill Tables with the EFT/SM values. [0]->Wilson=-2; [1]->Wilson=-1; [2]->Wilson=0; [3]->Wilson=1; [4]->Wilson=2;
+    string bin_name;
+    for(int i=0 ; i<nb_bins ; i++)
+    {
+        bin_name = "bin_content_";
+        bin_name += to_string(i+1);
+        Fit_cosS_cbwi_Input[i] = (TF1*) EFT_fInput[0]->Get(bin_name.c_str());
+        Wilson_cosS_cbwi_Input[i] = Fit_cosS_cbwi_Input[i]->GetFormula();
+    }
+
+    for(int i=0 ; i<nb_bins ; i++)
+    {
+        bin_name = "bin_content_";
+        bin_name += to_string(i+1);
+        Fit_cosS_ctwi_Input[i] = (TF1*) EFT_fInput[1]->Get(bin_name.c_str());
+        Wilson_cosS_ctwi_Input[i] = Fit_cosS_ctwi_Input[i]->GetFormula();
+    }
+
+    for(int i=0 ; i<nb_bins ; i++)
+    {
+        bin_name = "bin_content_";
+        bin_name += to_string(i+1);
+        Fit_phiS_cbwi_Input[i] = (TF1*) EFT_fInput[2]->Get(bin_name.c_str());
+        Wilson_phiS_cbwi_Input[i] = Fit_phiS_cbwi_Input[i]->GetFormula();
+    }
+
+    for(int i=0 ; i<nb_bins ; i++)
+    {
+        bin_name = "bin_content_";
+        bin_name += to_string(i+1);
+        Fit_phiS_ctwi_Input[i] = (TF1*) EFT_fInput[3]->Get(bin_name.c_str());
+        Wilson_phiS_ctwi_Input[i] = Fit_phiS_ctwi_Input[i]->GetFormula();
+    }
+
+
+    ////////////////////////////Import STreco data////////////////////////////
+    int nbfiles = 2;
     string suffix[nbfiles];
     
     suffix[0] = "hist_reco_phiStar.root";
     suffix[1] = "hist_reco_cosThetaStar.root";
 
     TFile* fInput[nbfiles]; //Import .root files
-    string inputDirectory; //pwd to .root files directory
     TH1D* nominal_Input_phi[8]; //Import signals and background noise nominals for PhiStar
     TH1D* nominal_Input_cos[8]; //Import signals and background noise nominals for CosThetaStar
-    TH1D* syst_Input_phi[40]; //Import signals and background noise Systematic Uncertainties
-
-
+    //TH1D* syst_Input_phi[40]; //Import signals and background noise Systematic Uncertainties
 
     for(int i=0 ; i<nbfiles ; i++)
     {
@@ -266,35 +266,43 @@ int main()
     nominal_Input_phi[2] = (TH1D*) fInput[0]->Get("elmu__tt__nominal");
     nominal_Input_phi[3] = (TH1D*) fInput[0]->Get("elmu__tw__nominal");
     nominal_Input_phi[4] = (TH1D*) fInput[0]->Get("elmu__wzjets__nominal");
-    nominal_Input_phi[5] = (TH1D*) fInput[0]->Get("elmu__data_obs__nominal");
-    nominal_Input_phi[6] = (TH1D*) fInput[0]->Get("elmu__QCD_DD_EC__nominal");
-    nominal_Input_phi[7] = (TH1D*) fInput[0]->Get("elmu__QCD_DD_Barrel__nominal");
+    nominal_Input_phi[5] = (TH1D*) fInput[0]->Get("elmu__QCD_DD_EC__nominal");
+    nominal_Input_phi[6] = (TH1D*) fInput[0]->Get("elmu__QCD_DD_Barrel__nominal");
 
     nominal_Input_cos[0] = (TH1D*) fInput[1]->Get("elmu__top__nominal");
     nominal_Input_cos[1] = (TH1D*) fInput[1]->Get("elmu__antitop__nominal");
     nominal_Input_cos[2] = (TH1D*) fInput[1]->Get("elmu__tt__nominal");
     nominal_Input_cos[3] = (TH1D*) fInput[1]->Get("elmu__tw__nominal");
     nominal_Input_cos[4] = (TH1D*) fInput[1]->Get("elmu__wzjets__nominal");
-    nominal_Input_cos[5] = (TH1D*) fInput[1]->Get("elmu__data_obs__nominal");
-    nominal_Input_cos[6] = (TH1D*) fInput[1]->Get("elmu__QCD_DD_EC__nominal");
-    nominal_Input_cos[7] = (TH1D*) fInput[1]->Get("elmu__QCD_DD_Barrel__nominal");
+    nominal_Input_cos[5] = (TH1D*) fInput[1]->Get("elmu__QCD_DD_EC__nominal");
+    nominal_Input_cos[6] = (TH1D*) fInput[1]->Get("elmu__QCD_DD_Barrel__nominal");
+
+
 
     ofstream out_file;
     out_file.open("Uncerts.txt");
     //myfile << "Writing this to a file.\n";
 
     //Compute Statistical uncert:
-    double delta_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
-    double delta_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
-    double delta_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
-    double delta_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
-    
+    double delta_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_cbwi_phi = "<<delta_cbwi_phi<<endl;
+
+    //double delta_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
+    //cout<<"delta_ctwi_phi = "<<delta_ctwi_phi<<endl;
+
+    //double delta_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
+    //cout<<"delta_cbwi_cos = "<<delta_cbwi_cos<<endl;
+
+    //double delta_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
+    //cout<<"delta_ctwi_cos = "<<delta_ctwi_cos<<endl;
+
+/*
     out_file << "delta_cbwi_phi = " << delta_cbwi_phi << "\n";
     out_file << "delta_ctwi_phi = " << delta_ctwi_phi << "\n";
     out_file << "delta_cbwi_cos = " << delta_cbwi_cos << "\n";
     out_file << "delta_ctwi_cos = " << delta_ctwi_cos << "\n";
 
-/*
+
 
     double Lumi_2017_syst = 0.0023;
 
