@@ -281,28 +281,28 @@ int main()
 
     ofstream out_file;
     out_file.open("Uncerts.txt");
-    //myfile << "Writing this to a file.\n";
-
+    out_file << "Only Systematic Uncertainties:\n";
+    
     //Compute Statistical uncert:
-    double delta_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-    cout<<"delta_cbwi_phi = "<<delta_cbwi_phi<<endl;
+    double delta_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_cbwi_phiStar = "<<delta_cbwi_phi<<endl;
 
-    //double delta_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
-    //cout<<"delta_ctwi_phi = "<<delta_ctwi_phi<<endl;
+    double delta_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_ctwi_phiStar = "<<delta_ctwi_phi<<endl;
 
-    //double delta_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
-    //cout<<"delta_cbwi_cos = "<<delta_cbwi_cos<<endl;
+    double delta_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_cbwi_cosThetaStar = "<<delta_cbwi_cos<<endl;
 
-    //double delta_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, false);
-    //cout<<"delta_ctwi_cos = "<<delta_ctwi_cos<<endl;
+    double delta_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    cout<<"delta_ctwi_cosThetaStar = "<<delta_ctwi_cos<<endl;
 
-/*
+
     out_file << "delta_cbwi_phi = " << delta_cbwi_phi << "\n";
     out_file << "delta_ctwi_phi = " << delta_ctwi_phi << "\n";
     out_file << "delta_cbwi_cos = " << delta_cbwi_cos << "\n";
     out_file << "delta_ctwi_cos = " << delta_ctwi_cos << "\n";
 
-
+/*
 
     double Lumi_2017_syst = 0.0023;
 
