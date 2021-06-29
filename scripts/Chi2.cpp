@@ -124,7 +124,7 @@ double Stat_and_Syst(string EFT, string KV, TH1D* phi_Input[7], TH1D* cos_Input[
             
             }
             //cout<<"tchannel= "<<tchannel<<endl;
-            ChiSquare_cosThetaS->SetBinContent(bin,chiSquare/nb_bins);
+            ChiSquare_cosThetaS->SetBinContent(bin, chiSquare/nb_bins);
             bin++;
             c+=step;
         }
@@ -154,6 +154,8 @@ int main()
     ////////////////////////////Import all TFormulas to get EFT/SM ratio per value of Wilson Coeff////////////////////////////
     int nb_bins = 20;
     int EFT_nb_files = 4;
+    int chiffres_signif_s= 2;
+    //int chiffres_signif_ss = 3;
 
     string EFT_file[EFT_nb_files];
     EFT_file[0] = "signal_proc_cosThetaStar_cbwi_elmu_20bins_Rwgt_cbwi2p5.root";
@@ -255,7 +257,11 @@ int main()
 
     ofstream out_file;
     out_file.open("Uncerts.txt");
-    out_file << "Statistical error:\n\n";
+    out_file << "LaTeX table:\n\n";
+
+    out_file << " " << "   &   " << "C_{tW}^{I}" << "   &   " << "C_{bW}^{I}" << "\\" << "\\" << "\n";
+    out_file << "\\hline\n";
+
     
     //Compute Statistical uncert:
     double delta_cbwi_phi_stat = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
@@ -271,15 +277,18 @@ int main()
     cout<<"delta_ctwi_cosThetaStar_stat = "<<delta_ctwi_cos_stat<<endl;
 
 
-    out_file << "delta_cbwi_phi_stat = " << delta_cbwi_phi_stat << "\n";
-    out_file << "delta_ctwi_phi_stat = " << delta_ctwi_phi_stat << "\n";
-    out_file << "delta_cbwi_cos_stat = " << delta_cbwi_cos_stat << "\n";
-    out_file << "delta_ctwi_cos_stat = " << delta_ctwi_cos_stat << "\n";
+    //out_file << "delta_cbwi_phi_stat = " << delta_cbwi_phi_stat << "\n";
+    //out_file << "delta_ctwi_phi_stat = " << delta_ctwi_phi_stat << "\n";
+    //out_file << "delta_cbwi_cos_stat = " << delta_cbwi_cos_stat << "\n";
+    //out_file << "delta_ctwi_cos_stat = " << delta_ctwi_cos_stat << "\n";
+
+    out_file << "$\\sigma_{stat}$:" << "   &   " << std::setprecision(chiffres_signif_s) << min(delta_ctwi_phi_stat,delta_ctwi_cos_stat) << "   &   " << std::setprecision(chiffres_signif_s) << min(delta_cbwi_phi_stat,delta_ctwi_cos_stat) << "\\" << "\\" << "\n"; //"   &   " << std::setprecision(chiffres_signif_ss) << max_value_between_cosT_and_phiS_ctwi_ss << "   &   " << std::setprecision(chiffres_signif_ss) << max_value_between_cosT_and_phiS_cbwi_ss << "\\" << "\\" << "\n";
+    out_file << "\\hline\n";
     
 
     ////////////////////////////////////Systematics///////////////////////////////////
     int nb_of_systs = 31;
-    out_file << "\n(Statistical + Systematic) and (Systematic) errors:\n" <<endl;
+    out_file << "$\\sigma_{syst}$:" << "   &   " << " " << "   &   " << " " << "\\" << "\\" << "\n";
     string prefix = "elmu";
     string physics_process[7] = {"__top__", "__antitop__", "__tt__", "__tw__", "__wzjets__", "__QCD_DD_EC__","__QCD_DD_Barrel__"};
     
@@ -306,6 +315,12 @@ int main()
     double Systematic_ctwi_phi;
     double Systematic_cbwi_cos;
     double Systematic_ctwi_cos;
+
+    double max_value_between_cosT_and_phiS_cbwi_ss;
+    double max_value_between_cosT_and_phiS_ctwi_ss;
+    double max_value_between_cosT_and_phiS_cbwi_s;
+    double max_value_between_cosT_and_phiS_ctwi_s;
+
 
     for(int i=0 ; i<nb_of_systs ; i++) //iteration over systematics
     {
@@ -384,26 +399,39 @@ int main()
 
         }
 
+        //syst_unc[i].replace(syst_unc[i].find("_"),1,"\\_");
+
         max_cbwi_phi = max(abs(stat_syst_cbwi_phi[0]),abs(stat_syst_cbwi_phi[1]));
         max_ctwi_phi = max(abs(stat_syst_ctwi_phi[0]),abs(stat_syst_ctwi_phi[1]));
         max_cbwi_cos = max(abs(stat_syst_cbwi_cos[0]),abs(stat_syst_cbwi_cos[1]));
         max_ctwi_cos = max(abs(stat_syst_ctwi_cos[0]),abs(stat_syst_ctwi_cos[1]));
 
-        out_file <<"(Stat + Syst) delta_cbwi_phiStar for "<<syst_unc[i]<<" and " << " = " << max_cbwi_phi << "\n";
-        out_file <<"(Stat + Syst) delta_ctwi_phiStar for "<<syst_unc[i]<<" and " << " = " << max_ctwi_phi << "\n";
-        out_file <<"(Stat + Syst) delta_cbwi_cosThetaStar for "<<syst_unc[i]<<" and " << " = " << max_cbwi_cos << "\n";
-        out_file <<"(Stat + Syst) delta_ctwi_cosThetaStar for "<<syst_unc[i]<<" and "<< " = " << max_ctwi_cos << "\n" << "\n";
+        //out_file <<"(Stat + Syst) delta_cbwi_phiStar for "<<syst_unc[i]<< " = " << max_cbwi_phi << "\n";
+        //out_file <<"(Stat + Syst) delta_ctwi_phiStar for "<<syst_unc[i]<< " = " << max_ctwi_phi << "\n";
+        //out_file <<"(Stat + Syst) delta_cbwi_cosThetaStar for "<<syst_unc[i]<< " = " << max_cbwi_cos << "\n";
+        //out_file <<"(Stat + Syst) delta_ctwi_cosThetaStar for "<<syst_unc[i]<< " = " << max_ctwi_cos << "\n" << "\n";
+
+        max_value_between_cosT_and_phiS_cbwi_ss = min(max_cbwi_phi,max_cbwi_cos);
+        //out_file<<"\n (Stat + Syst) Min Value for CbWi in " << syst_unc[i] << " = " << max_value_between_cosT_and_phiS_cbwi_ss << "\n";
+        max_value_between_cosT_and_phiS_ctwi_ss = min(max_ctwi_phi,max_ctwi_cos);
+        //out_file<<"\n (Stat + Syst) Min Value for CtWi in " << syst_unc[i] << " = " << max_value_between_cosT_and_phiS_ctwi_ss << "\n";
 
         Systematic_cbwi_phi = sqrt( abs( pow(max_cbwi_phi,2) - pow (delta_cbwi_phi_stat,2) ) );
         Systematic_ctwi_phi = sqrt( abs( pow(max_ctwi_phi,2) - pow (delta_ctwi_phi_stat,2) ) );
         Systematic_cbwi_cos = sqrt( abs( pow(max_cbwi_cos,2) - pow (delta_cbwi_cos_stat,2) ) );
         Systematic_ctwi_cos = sqrt( abs( pow(max_ctwi_cos,2) - pow (delta_ctwi_cos_stat,2) ) );
 
-        out_file <<"(Syst) delta_cbwi_phiStar for "<<syst_unc[i]<<" and " << " = " << max_cbwi_phi << "\n";
-        out_file <<"(Syst) delta_ctwi_phiStar for "<<syst_unc[i]<<" and " << " = " << max_ctwi_phi << "\n";
-        out_file <<"(Syst) delta_cbwi_cosThetaStar for "<<syst_unc[i]<<" and " << " = " << max_cbwi_cos << "\n";
-        out_file <<"(Syst) delta_ctwi_cosThetaStar for "<<syst_unc[i]<<" and "<< " = " << max_ctwi_cos << "\n" << "\n";
+        //out_file <<"(Syst) delta_cbwi_phiStar for "<<syst_unc[i]<< " = " << Systematic_cbwi_phi << "\n";
+        //out_file <<"(Syst) delta_ctwi_phiStar for "<<syst_unc[i]<< " = " << Systematic_ctwi_phi << "\n";
+        //out_file <<"(Syst) delta_cbwi_cosThetaStar for "<<syst_unc[i]<< " = " << Systematic_cbwi_cos << "\n";
+        //out_file <<"(Syst) delta_ctwi_cosThetaStar for "<<syst_unc[i]<< " = " << Systematic_ctwi_cos << "\n" << "\n";
 
+        max_value_between_cosT_and_phiS_cbwi_s = min(Systematic_cbwi_phi,Systematic_cbwi_cos);
+        //out_file<<"\n (Syst) Min Value for CbWi in " << syst_unc[i] << " = " << max_value_between_cosT_and_phiS_cbwi << "\n";
+        max_value_between_cosT_and_phiS_ctwi_s = min(Systematic_ctwi_phi,Systematic_ctwi_cos);
+        //out_file<<"\n (Syst) Min Value for CtWi in " << syst_unc[i] << " = " << max_value_between_cosT_and_phiS_ctwi << "\n \n \n";
+
+        out_file << syst_unc[i] << "   &   " << std::setprecision(chiffres_signif_s) << max_value_between_cosT_and_phiS_ctwi_s << "   &   " << std::setprecision(chiffres_signif_s) << max_value_between_cosT_and_phiS_cbwi_s << "\\" << "\\" << "\n"; //"   &   " << std::setprecision(chiffres_signif_ss) << max_value_between_cosT_and_phiS_ctwi_ss << "   &   " << std::setprecision(chiffres_signif_ss) << max_value_between_cosT_and_phiS_cbwi_ss << "\\" << "\\" << "\n";
 
     }
 
@@ -411,7 +439,7 @@ int main()
     double tt_normalization_syst = 0.06;
     double tw_normalization_syst = 0.11;
     double wzjets_normalization_syst = 0.1;
-    double qcd_normalization_2017_syst = 0.5;
+    double qcd_normalization_2017_syst = 0.15;
 
     double Errors[5] = {Lumi_2017_syst, tt_normalization_syst, tw_normalization_syst, wzjets_normalization_syst, qcd_normalization_2017_syst};
 
@@ -427,32 +455,116 @@ int main()
     double up_error_ctwi_cos;
     double down_error_ctwi_cos;
 
+    double min_cbwi;
+    double min_ctwi;
+
     string source[5] = {"Lumi_2017_syst", "tt_normalization_syst", "tw_normalization_syst", "wzjets_normalization_syst", "qcd_normalization_2017_syst"};
 
     for(int i=0 ; i<5 ; i++)
-    {
-        if(i==0) 
-        up_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-        down_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+    { 
+        if(i==0)
+        {
+            cout<<"treating i = "<<i<<" ; for "<<source[i]<<"Error= "<<Errors[i]<<endl;
+            up_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
 
-        up_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-        down_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            up_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
 
-        up_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-        down_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            up_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
 
-        up_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
-        down_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            up_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+        }
+
+        if(i==1)
+        {
+            cout<<"treating i = "<<i<<" ; for "<<source[i]<<"Error= "<<Errors[i]<<endl;            
+            up_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1+Errors[i], 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1-Errors[i], 1, 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+        }
+
+        if(i==2)
+        {
+            cout<<"treating i = "<<i<<" ; for "<<source[i]<<"Error= "<<Errors[i]<<endl;
+            up_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1+Errors[i], 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1-Errors[i], 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1+Errors[i], 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1-Errors[i], 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1+Errors[i], 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1-Errors[i], 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1+Errors[i], 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1-Errors[i], 1, 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+         
+        }
+
+        if(i==3)
+        {
+            cout<<"treating i = "<<i<<" ; for "<<source[i]<<"Error= "<<Errors[i]<<endl;
+            up_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1+Errors[i], 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1-Errors[i], 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1+Errors[i], 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1-Errors[i], 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1+Errors[i], 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1-Errors[i], 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1+Errors[i], 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1-Errors[i], 1, 1, true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+         
+        }
+
+        if(i==4)
+        {
+            cout<<"treating i = "<<i<<" ; for "<<source[i]<<"Error= "<<Errors[i]<<endl;
+            up_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_phi = Stat_and_Syst("cbwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_phi = Stat_and_Syst("ctwi", "phi", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_cbwi_cos = Stat_and_Syst("cbwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+
+            up_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1+Errors[i], 1+Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+            down_error_ctwi_cos = Stat_and_Syst("ctwi", "cos", nominal_Input_phi, nominal_Input_cos, 1, 1, 1, 1-Errors[i], 1-Errors[i], true, Wilson_phiS_cbwi_Input, Wilson_phiS_ctwi_Input, Wilson_cosS_cbwi_Input, Wilson_cosS_ctwi_Input);
+         
+        }
+
+
+
+        //source[i].replace(source[i].find("_"),1,"\\_");
+
 
         max_cbwi_phi = max(abs(up_error_cbwi_phi),abs(down_error_cbwi_phi)); 
         max_ctwi_phi = max(abs(up_error_ctwi_phi),abs(down_error_ctwi_phi));
         max_cbwi_cos = max(abs(up_error_cbwi_cos),abs(down_error_cbwi_cos));
         max_ctwi_cos = max(abs(up_error_ctwi_cos),abs(down_error_ctwi_cos));
 
-        out_file <<"(Stat + Syst) delta_cbwi_phiStar for "<<source[i]<<" and " << " = " << max_cbwi_phi << "\n";
-        out_file <<"(Stat + Syst) delta_ctwi_phiStar for "<<source[i]<<" and " << " = " << max_ctwi_phi << "\n";
-        out_file <<"(Stat + Syst) delta_cbwi_cosThetaStar for "<<source[i]<<" and " << " = " << max_cbwi_cos << "\n";
-        out_file <<"(Stat + Syst) delta_ctwi_cosThetaStar for "<<source[i]<<" and "<< " = " << max_ctwi_cos << "\n" << "\n";
+        //out_file <<"(Stat + Syst) delta_cbwi_phiStar for "<<source[i]<<" and " << " = " << max_cbwi_phi << "\n";
+        //out_file <<"(Stat + Syst) delta_ctwi_phiStar for "<<source[i]<<" and " << " = " << max_ctwi_phi << "\n";
+        //out_file <<"(Stat + Syst) delta_cbwi_cosThetaStar for "<<source[i]<<" and " << " = " << max_cbwi_cos << "\n";
+        //out_file <<"(Stat + Syst) delta_ctwi_cosThetaStar for "<<source[i]<<" and "<< " = " << max_ctwi_cos << "\n" << "\n";
+
+        max_value_between_cosT_and_phiS_cbwi_ss = min(max_cbwi_phi,max_cbwi_cos);
+        //out_file<<"\n (Stat + Syst) Min Value for CbWi in " << source[i] << " = " << max_value_between_cosT_and_phiS_cbwi_ss << "\n";
+        max_value_between_cosT_and_phiS_ctwi_ss = min(max_ctwi_phi,max_ctwi_cos);
+        //out_file<<"\n (Stat + Syst) Min Value for CtWi in " << source[i] << " = " << max_value_between_cosT_and_phiS_ctwi_ss << "\n";
 
 
         Systematic_cbwi_phi = sqrt( abs( pow(max_cbwi_phi,2) - pow (delta_cbwi_phi_stat,2) ) );
@@ -460,11 +572,34 @@ int main()
         Systematic_cbwi_cos = sqrt( abs( pow(max_cbwi_cos,2) - pow (delta_cbwi_cos_stat,2) ) );
         Systematic_ctwi_cos = sqrt( abs( pow(max_ctwi_cos,2) - pow (delta_ctwi_cos_stat,2) ) );
 
-        out_file <<"(Syst) delta_cbwi_phiStar for "<<source[i]<<" and " << " = " << max_cbwi_phi << "\n";
-        out_file <<"(Syst) delta_ctwi_phiStar for "<<source[i]<<" and " << " = " << max_ctwi_phi << "\n";
-        out_file <<"(Syst) delta_cbwi_cosThetaStar for "<<source[i]<<" and " << " = " << max_cbwi_cos << "\n";
-        out_file <<"(Syst) delta_ctwi_cosThetaStar for "<<source[i]<<" and "<< " = " << max_ctwi_cos << "\n" << "\n";
+        //out_file <<"(Syst) delta_cbwi_phiStar for "<<source[i]<<" and " << " = " << Systematic_cbwi_phi << "\n";
+        //out_file <<"(Syst) delta_ctwi_phiStar for "<<source[i]<<" and " << " = " << Systematic_ctwi_phi << "\n";
+        //out_file <<"(Syst) delta_cbwi_cosThetaStar for "<<source[i]<<" and " << " = " << Systematic_cbwi_cos << "\n";
+        //out_file <<"(Syst) delta_ctwi_cosThetaStar for "<<source[i]<<" and "<< " = " << Systematic_ctwi_cos << "\n" << "\n";
+
+        min_cbwi = min(Systematic_cbwi_phi,Systematic_cbwi_cos);
+        //out_file<<"\n (Syst) Min Value for CbWi in " << source[i] << " = " << min_cbwi << "\n";
+        min_ctwi = min(Systematic_ctwi_phi,Systematic_ctwi_cos);
+        //out_file<<"\n (Syst) Min Value for CtWi in " << source[i] << " = " << min_ctwi << "\n \n \n";
+
+        out_file << source[i] << "   &   " << std::setprecision(chiffres_signif_s) << min_ctwi << "   &   " << std::setprecision(chiffres_signif_s) << min_cbwi << "\\" << "\\" << "\n"; //"   &   " << std::setprecision(chiffres_signif_ss) << max_value_between_cosT_and_phiS_ctwi_ss << "   &   " << std::setprecision(chiffres_signif_ss) << max_value_between_cosT_and_phiS_cbwi_ss << "\\" << "\\" << "\n";
+
+
+        up_error_cbwi_phi=0;
+        down_error_cbwi_phi=0;
+
+        up_error_ctwi_phi=0;
+        down_error_ctwi_phi=0;
+
+        up_error_cbwi_cos=0;
+        down_error_cbwi_cos=0;
+
+        up_error_ctwi_cos=0;
+        down_error_ctwi_cos=0;
     }
+
+    //out_file << "\\hline\n";
+
 
     out_file.close();
 
